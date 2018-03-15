@@ -1,2 +1,0 @@
-# udacity
-udacity projects
