@@ -5,6 +5,7 @@
 In this project, I use the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset) to train custom _covnet_ based on the LeNet model. The training/validation and test sets consist of already cropped images from the original dataset and split/saved into the python's _pickle_ format.
 
 **Summary of the Dataset**
+
 |Summary|Value|
 |--|--|
 |Number of training examples | 34799|
