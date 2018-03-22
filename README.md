@@ -1,64 +1,159 @@
-- [ ] test
+# Traffic Sign Recognition Program
 
-## Project: Build a Traffic Sign Recognition Program
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+# Overview
 
-Overview
----
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to classify traffic signs. You will train and validate a model so it can classify traffic sign images using the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset). After the model is trained, you will then try out your model on images of German traffic signs that you find on the web.
+In this project, I use the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset) to train custom _covnet_ based on the LeNet model. The training/validation and test sets consist of already cropped images from the original dataset and split/saved into the python's _pickle_ format.
 
-We have included an Ipython notebook that contains further instructions 
-and starter code. Be sure to download the [Ipython notebook](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb). 
+**Summary of the Dataset**
+|Summary|Value|
+|--|--|
+|Number of training examples | 34799|
+|Number of testing examples | 12630|
+|Image data shape | 32x32x3|
+|Number of classes | 43|
 
-We also want you to create a detailed writeup of the project. Check out the [writeup template](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup. The writeup can be either a markdown file or a pdf document.
+The distribution of the classes in the Training/Validation and Test datasest in not uniform. Some signs have substantially more traing examples then others:
 
-To meet specifications, the project will require submitting three files: 
-* the Ipython notebook with the code
-* the code exported as an html file
-* a writeup report either as a markdown or pdf file 
+![distribution of classes](images/distribution.png)
 
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/481/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
+The Dataset consists of 43 different traffic signs, which is only a small portion of all possible german traffic signs. The signs included in the train set are as follows:
 
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
+|Value|Corresponding Traffic Sign|
+|-----:|:------------|
+|0|Speed limit (20km/h)|
+|1|Speed limit (30km/h)|
+|2|Speed limit (50km/h)|
+|3|Speed limit (60km/h)|
+|4|Speed limit (70km/h)|
+|5|Speed limit (80km/h)|
+|6|End of speed limit (80km/h)|
+|7|peed limit (100km/h)|
+|8|Speed limit (120km/h)|
+|9|No passing|
+|10|No passing for vehicles over 3.5 metric tons|
+|11|Right-of-way at the next intersection|
+|12|Priority road|
+|13|Yield|
+|14|Stop|
+|15|No vehicles|
+|16|Vehicles over 3.5 metric tons prohibited|
+|17|No entry|
+|18|General caution|
+|19|Dangerous curve to the left|
+|20|Dangerous curve to the right
+|21|Double curve|
+|22|Bumpy road|
+|23|Slippery road|
+|24|Road narrows on the right|
+|25|Road work|
+|26|Traffic signals|
+|27|Pedestrians|
+|28|Children crossing|
+|29|Bicycles crossing|
+|30|Beware of ice/snow|
+|31|Wild animals crossing|
+|32|End of all speed and passing limits|
+|33|Turn right ahead|
+|34|Turn left ahead|
+|35|Ahead only|
+|36|Go straight or right|
+|37|Go straight or left|
+|38|Keep right|
+|39|Keep left|
+|40|Roundabout mandatory|
+|41|End of no passing|
+|42|End of no passing by vehicles over 3.5 metric ...|
 
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
+### Example of the training traffic signs:
 
-The Project
----
-The goals / steps of this project are the following:
-* Load the data set
-* Explore, summarize and visualize the data set
-* Design, train and test a model architecture
-* Use the model to make predictions on new images
-* Analyze the softmax probabilities of the new images
-* Summarize the results with a written report
+![Example of the training traffic signs](images/example.png)
 
-### Dependencies
-This lab requires:
+### Preprocessing
 
-* [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
+#### Input
+The datasets contain pixel information as the `int32` format in the range [0, 255]. After experimenting with normalization of the input information using similar technique to the one used in the VGG network where the **mean** calculated on all channels of the training data is deducted from the pixel value of the input data and divided by the channel's **standard deviation**.
 
-The lab environment can be created with CarND Term1 Starter Kit. Click [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) for the details.
+$\text{normalized input} = \frac{\text{input} - \text{channel's mean}{\text{channel's standard deviation}$
 
-### Dataset and Repository
+I could not get a satisfactory results using that method of normalization (around 0.40 validation accuracy). Leaving the input data in the original format turned out to have much better results.
 
-1. Download the data set. The classroom has a link to the data set in the "Project Instructions" content. This is a pickled dataset in which we've already resized the images to 32x32. It contains a training, validation and test set.
-2. Clone the project, which contains the Ipython notebook and the writeup template.
-```sh
-git clone https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project
-cd CarND-Traffic-Sign-Classifier-Project
-jupyter notebook Traffic_Sign_Classifier.ipynb
-```
+I used the data in RGB format in order to be able to see the difference between the signs of the same shape but different meaning based on the sign's color.
 
-### Requirements for Submission
-Follow the instructions in the `Traffic_Sign_Classifier.ipynb` notebook and write the project report using the writeup template as a guide, `writeup_template.md`. Submit the project code and writeup document.
+#### Output
+I one-hot encoded the value of the labels into a vector with the length 43.
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+## Covnet model
 
-=======
-# udacity
-udacity projects
->>>>>>> 41f54d2ac5345255630cec03aef261aa264eecd0
+In my model I use two separate covnet pipelines with added outputs, which is fed into the fully-connected layer.
+
+|Name|Kernel Size|Kernel Depth|Stride|Padding|Output Size|
+|-|-|-|-|-|-|
+|Input|||||32x32x3|
+|conv1+ReLU|5x5|18|(1, 1, 1, 1)|VALID|28X28X18|
+|Maxpool|2x2|18|(1, 2, 2, 1)|VALID|14x14x18|
+|conv2+Relu|5x5|64|(1, 1, 1, 1)|VALID|10x10x64|
+|Maxpool|2x2|64|(1, 2, 2, 1)|VALID|5x5x64|
+|Output(Flatten)|||||1600|
+
+Outputs of two separate covnets are added and fed into the following neural network:
+
+|Layer|Layer Size|Activation|
+|-|-|-|
+|Input|1600|None|
+|Layer 1+Dropout|512|ReLU|
+|Layer 2|256|ReLU|
+|Output|43|None|
+
+As a measure to prevent overfitting I have used the _dropout_. I have also tried to use _batch normalization_, but it was bringing the validation accuracy down to around 0.50.
+
+#### Optimization
+I have chosen an _Adam_ optimizer as it supports learning rate decay and replaces in most cases traditional _Stochastic Gradient Descent optimization_ method.
+
+#### Hyper-parameters
+
+|Name|Value|
+|-|-|
+|Learning Rate|0.0003|
+|Dropout|0.5|
+|Weight initialization: mean|0.0|
+|Weight initialization: stdev|0.01|
+|Epochs|40|
+|Batch Size|128|
+
+#### Training
+
+Validation accuracy reaches 0.93 on the 7th epoch, and then raises slowely up to 0.96
+
+![validation accuracy](images/validation.png)
+
+The **test accuracy** on the fully trained network reaches **0.94**, and the **recall-precision score** reaches **0.97**.
+
+![precision-recall](images/precision-recall.png)
+
+## Validation on new test data
+
+I scrapped 20 new traffic signs from streets of Hamburg/Germany using Google Street View. That new data included signs the network was trained to recognize but also signs that were not in the training dataset.
+
+![new signs](images/newsigns.png)
+
+The accuracy of this traffic signs recognition system for the new data is **0.846**.
+
+The network has very strong opinions about the meaning of the signs not included in the traing, which may be an indicator of the network's overfitting. 
+
+![bar chart 1](images/bc1.png)
+![bar chart 2](images/bc2.png)
+![bar chart 3](images/bc3.png)
+![bar chart 4](images/bc4.png)
+![bar chart 5](images/bc5.png)
+
+## Visualization of the covnet layer
+
+I used the following traffic sign to see what are the states of the convolutional network layer:
+
+![yield](images/yield.png)
+
+I used the the output of the 2nd covnet layer of the size 10x10x64 to see the responses, which look as follow:
+
+![states](images/states.png)
+
+It shows that the region of interest for this particular sign lays in the middle.
